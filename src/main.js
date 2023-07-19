@@ -1,4 +1,16 @@
+
+
 import { createApp } from "vue";
 import App from "./App.vue";
+import Tree from 'primevue/tree';
+import PrimeVue from "primevue/config";
+import "primeflex/primeflex.css";
+import "primevue/resources/themes/lara-light-blue/theme.css";
+import "primevue/resources/primevue.min.css"; /* Deprecated */
+import "primeicons/primeicons.css";
 
-createApp(App).mount("#app");
+const app = createApp(App);
+app.component('Tree', Tree);
+app.config.globalProperties.window = window
+app.use(PrimeVue, { ripple: true });
+app.mount('#app');
