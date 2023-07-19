@@ -1,4 +1,4 @@
-export const NodeService = {
+export const DoctorsIservicesBindsService = {
     getTreeNodesData() {
         return [
             {
