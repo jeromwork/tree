@@ -3,7 +3,7 @@ export const DoctorsIservicesBindsService = {
         return [
             {
                 key: '0',
-                label: 'Documents',
+                label: 'Documents2',
                 data: 'Documents Folder',
                 icon: 'pi pi-fw pi-inbox',
                 children: [
@@ -11,6 +11,7 @@ export const DoctorsIservicesBindsService = {
                         key: '0-0',
                         label: 'Work',
                         data: 'Work Folder',
+                        checked:true,
                         icon: 'pi pi-fw pi-cog',
                         children: [
                             { key: '0-0-0', label: 'Expenses.doc', icon: 'pi pi-fw pi-file', data: 'Expenses Document' },
