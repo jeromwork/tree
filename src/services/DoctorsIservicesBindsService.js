@@ -1,74 +1,41 @@
+import treeBindsState from '@/state/TreeBindsState.js'
+import treeApi from '@/api/TreeApi.js'
+
 export const DoctorsIservicesBindsService = {
-    getTreeNodesData() {
-        return [
-            {
-                key: '0',
-                label: 'Documents2',
-                data: 'Documents Folder',
-                icon: 'pi pi-fw pi-inbox',
-                children: [
-                    {
-                        key: '0-0',
-                        label: 'Work',
-                        data: 'Work Folder',
-                        checked:true,
-                        icon: 'pi pi-fw pi-cog',
-                        children: [
-                            { key: '0-0-0', label: 'Expenses.doc', icon: 'pi pi-fw pi-file', data: 'Expenses Document' },
-                            { key: '0-0-1', label: 'Resume.doc', icon: 'pi pi-fw pi-file', data: 'Resume Document' }
-                        ]
-                    },
-                    {
-                        key: '0-1',
-                        label: 'Home',
-                        data: 'Home Folder',
-                        icon: 'pi pi-fw pi-home',
-                        children: [{ key: '0-1-0', label: 'Invoices.txt', icon: 'pi pi-fw pi-file', data: 'Invoices for this month' }]
-                    }
-                ]
-            },
-            {
-                key: '1',
-                label: 'Events',
-                data: 'Events Folder',
-                icon: 'pi pi-fw pi-calendar',
-                children: [
-                    { key: '1-0', label: 'Meeting', icon: 'pi pi-fw pi-calendar-plus', data: 'Meeting' },
-                    { key: '1-1', label: 'Product Launch', icon: 'pi pi-fw pi-calendar-plus', data: 'Product Launch' },
-                    { key: '1-2', label: 'Report Review', icon: 'pi pi-fw pi-calendar-plus', data: 'Report Review' }
-                ]
-            },
-            {
-                key: '2',
-                label: 'Movies',
-                data: 'Movies Folder',
-                icon: 'pi pi-fw pi-star-fill',
-                children: [
-                    {
-                        key: '2-0',
-                        icon: 'pi pi-fw pi-star-fill',
-                        label: 'Al Pacino',
-                        data: 'Pacino Movies',
-                        children: [
-                            { key: '2-0-0', label: 'Scarface', icon: 'pi pi-fw pi-video', data: 'Scarface Movie' },
-                            { key: '2-0-1', label: 'Serpico', icon: 'pi pi-fw pi-video', data: 'Serpico Movie' }
-                        ]
-                    },
-                    {
-                        key: '2-1',
-                        label: 'Robert De Niro',
-                        icon: 'pi pi-fw pi-star-fill',
-                        data: 'De Niro Movies',
-                        children: [
-                            { key: '2-1-0', label: 'Goodfellas', icon: 'pi pi-fw pi-video', data: 'Goodfellas Movie' },
-                            { key: '2-1-1', label: 'Untouchables', icon: 'pi pi-fw pi-video', data: 'Untouchables Movie' }
-                        ]
-                    }
-                ]
+    state: treeBindsState,
+    async fetchIservicesTreeFromServer(requestData){
+        state: treeBindsState,
+        //handle data from request adapters
+        requestData = (requestData) ? requestData : {};
+        requestData = {...requestData,
+            action:'getIservicesTree',
+            component:'health'
+        }
+
+        if( treeBindsState.requestData() )  requestData = { ...requestData, ...treeBindsState.requestData() };
+
+        const res = await treeApi.getTreeNodes(requestData);
+        if(Object.keys(res).length > 0 && res.items){
+            //if simply refresh data from server run refreshItems()
+            if(requestData?.id || requestData?.ids){
+                treeBindsState.refreshItems(res.items);
+            }else{
+                treeBindsState.setItems(res.items);
+                treeBindsState.setCount(res.count);
             }
-        ];
+
+        }
+
+
+
+        //todo handle error
+        return true;
     },
 
+
+    getIservicesTree(condition){
+        if( !condition ) return this.state.getItems();
+    },
     getTreeTableNodesData() {
         return [
             {
@@ -426,7 +393,104 @@ export const DoctorsIservicesBindsService = {
         return Promise.resolve(this.getTreeTableNodesData());
     },
 
-    getTreeNodes() {
-        return Promise.resolve(this.getTreeNodesData());
-    }
+
+    mergeBindsData(node, bindData, type ) {
+    let selectedData = {};
+    //
+    if(!bindData) return ;
+
+
+        // console.log(node)
+        for (const [key, tree] of Object.entries(node)) {
+            // console.log(tree.children)
+            if(tree.children){
+
+                const currentSelectedData = this.mergeBindsData( tree.children, bindData, type );
+                let countSelectedChildren = 0;
+                //
+                //const selectedChildren = Object.entries(selectedData).filter(item => item.checked);
+                for (const [c, child] of Object.entries(node)) {
+                    console.log(child)
+                    if(currentSelectedData[child.key] && currentSelectedData[child.key].checked) countSelectedChildren++;
+                }
+
+                //const selectedChildren = Object.fromEntries( Object.entries(currentSelectedData).filter(([key, value]) => value.checked) )
+
+                const countChildren = Object.keys( tree['children']).length
+
+                console.log(countChildren, '>', countSelectedChildren)
+
+                if(countSelectedChildren > 0){
+
+                    if(!selectedData[tree.key]) selectedData[tree.key] = {};
+                    if( countChildren === countSelectedChildren ) {
+                        selectedData[tree.key]['checked'] = true;
+                    }else if( countChildren > countSelectedChildren ){
+                        selectedData[tree.key]['checked'] = false;
+                        selectedData[tree.key]['partialChecked'] = true;
+                    }
+                }
+                selectedData = Object.assign(selectedData, currentSelectedData);
+
+                //console.log(Object.keys( selectedChildren).length, Object.keys( tree['children']).length)
+                // debugger;
+            }
+
+            const bind = bindData[tree.id];
+
+            if( tree?.data?.type === type && bind){
+                if(!selectedData[tree.key]) selectedData[tree.key] = {};
+                selectedData[tree.key] = {...tree.data, ...bind };
+                if( bind.active ) selectedData[tree.key]['checked'] = 'checked';
+
+            }//else selectedData[tree.key] = tree;
+        }
+    // $.each(node, (t, tree) => {
+    //     // if(!tree['children']) return node;
+    //     if(tree['children']){
+    //
+    //         const currentSelectedData = this.mergeBindsData( tree['children'], bindData, type );
+    //         let countSelectedChildren = 0;
+    //         //
+    //         //const selectedChildren = Object.entries(selectedData).filter(item => item.checked);
+    //
+    //         $.each( tree['children'], (c, child)=> {
+    //             if(currentSelectedData[child.key] && currentSelectedData[child.key].checked) countSelectedChildren++;
+    //             // debugger;
+    //         });
+    //         //const selectedChildren = Object.fromEntries( Object.entries(currentSelectedData).filter(([key, value]) => value.checked) )
+    //
+    //         const countChildren = Object.keys( tree['children']).length
+    //
+    //         //console.log(countChildren, '>', countSelectedChildren)
+    //
+    //         if(countSelectedChildren > 0){
+    //
+    //             if(!selectedData[tree.key]) selectedData[tree.key] = {};
+    //             if( countChildren === countSelectedChildren ) {
+    //                 selectedData[tree.key]['checked'] = true;
+    //             }else if( countChildren > countSelectedChildren ){
+    //                 selectedData[tree.key]['checked'] = false;
+    //                 selectedData[tree.key]['partialChecked'] = true;
+    //             }
+    //         }
+    //         selectedData = Object.assign(selectedData, currentSelectedData);
+    //
+    //         //console.log(Object.keys( selectedChildren).length, Object.keys( tree['children']).length)
+    //         // debugger;
+    //     }
+    //
+    //     const bind = bindData[tree.id];
+    //
+    //     if( tree?.data?.type === type && bind){
+    //         if(!selectedData[tree.key]) selectedData[tree.key] = {};
+    //         selectedData[tree.key] = {...tree.data, ...bind };
+    //         if( bind.active ) selectedData[tree.key]['checked'] = 'checked';
+    //
+    //     }//else selectedData[tree.key] = tree;
+    // });
+
+    return selectedData;
+},
+
 };

@@ -1,23 +1,93 @@
 <template>
-  <div>
-    <Button label="Show" icon="pi pi-external-link" @click="showDialog = true" />
-    <TreeDialog id="tree" v-model:visible="showDialog"/>
-    {{showDialog}}
+  <div ref="treeDialogComponent" id="treeDialogComponent">
+    <Button v-if="showTestDialogButton" label="Show" icon="pi pi-external-link" @click="showDialog = true" />
+    <TreeDialog id="tree" v-model:visible="showDialog"
+    @save="onSave"/>
   </div>
-
 </template>
 
 <script setup>
   import TreeDialog from "./components/TreeDialog"
-  import {reactive, ref, computed} from 'vue';
+  import {reactive, ref, computed, onMounted} from 'vue';
+  import {DoctorsIservicesBindsService} from "./services/DoctorsIservicesBindsService";
 
   let  mockNodes = ref({});
+ const  mockSelectedItems = ref({});
 
-  window.treeBinds = (window.treeBinds) ? reactive(window.treeBinds) : reactive({tree:mockNodes, selectedItems:{}, changedData:{}, showDialog:false});
+  window.treeBinds = (window.treeBinds) ? reactive(window.treeBinds) : reactive({tree:mockNodes, selectedItems:mockSelectedItems, changedData:{}, showDialog:false});
   const showDialog = computed({
     get(){ return  window.treeBinds.showDialog},
     set(s){ window.treeBinds.showDialog = s;}
   });
+  const treeDialogComponent = ref(null);
+  const showTestDialogButton = computed(()=>!window.$);
+const onSave = (e) =>{
+
+// Dispatch/Trigger/Fire the event
+  treeDialogComponent.value.dispatchEvent(new CustomEvent("save", {detail: window.treeBinds}));
+
+  showDialog.value = false;
+
+}
+
+
+
+  onMounted(async () => {
+     await DoctorsIservicesBindsService.fetchIservicesTreeFromServer();
+  });
+
+  mockSelectedItems.value = {
+    "2379": {
+      "active": "1",
+      "use_always": "0",
+      "custom_price": "-1.00"
+    },
+    "3430": {
+      "active": "1",
+      "use_always": "0",
+      "custom_price": "-1.00"
+    },
+    "3431": {
+      "active": "1",
+      "use_always": "0",
+      "custom_price": "-1.00"
+    },
+    "3644": {
+      "active": "1",
+      "use_always": "0",
+      "custom_price": "-1.00"
+    },
+    "6133": {
+      "active": "1",
+      "use_always": "0",
+      "custom_price": "-1.00"
+    },
+    "6134": {
+      "active": "1",
+      "use_always": "0",
+      "custom_price": "-1.00"
+    },
+    "6211": {
+      "active": "1",
+      "use_always": "0",
+      "custom_price": "-1.00"
+    },
+    "6212": {
+      "active": "1",
+      "use_always": "0",
+      "custom_price": "-1.00"
+    },
+    "6213": {
+      "active": "1",
+      "use_always": "0",
+      "custom_price": "-1.00"
+    },
+    "6214": {
+      "active": "1",
+      "use_always": "0",
+      "custom_price": "-1.00"
+    }
+  };
 
   mockNodes.value = [
     {
