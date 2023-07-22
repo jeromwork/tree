@@ -37,55 +37,48 @@ const onSave = (e) =>{
   });
 
   mockSelectedItems.value = {
-    "2379": {
-      "active": "1",
-      "use_always": "0",
-      "custom_price": "-1.00"
+    "#10167623": {
+      "checked": false,
+      "partialChecked": true
     },
-    "3430": {
-      "active": "1",
-      "use_always": "0",
-      "custom_price": "-1.00"
+    "#10167623-6133": {
+      "checked": true
     },
-    "3431": {
-      "active": "1",
-      "use_always": "0",
-      "custom_price": "-1.00"
+    "#10167623-6134": {
+      "checked": true
     },
-    "3644": {
-      "active": "1",
-      "use_always": "0",
-      "custom_price": "-1.00"
+    "#10167623-6211": {
+      "checked": true
     },
-    "6133": {
-      "active": "1",
-      "use_always": "0",
-      "custom_price": "-1.00"
+    "#10167623-6212": {
+      "checked": true
     },
-    "6134": {
-      "active": "1",
-      "use_always": "0",
-      "custom_price": "-1.00"
+    "#10167623-6213": {
+      "checked": true
     },
-    "6211": {
-      "active": "1",
-      "use_always": "0",
-      "custom_price": "-1.00"
+    "#10167623-6214": {
+      "checked": true
     },
-    "6212": {
-      "active": "1",
-      "use_always": "0",
-      "custom_price": "-1.00"
+    "#10167623-#310": {
+      "checked": true
     },
-    "6213": {
-      "active": "1",
-      "use_always": "0",
-      "custom_price": "-1.00"
+    "#10167623-#310-3430": {
+      "checked": true
     },
-    "6214": {
-      "active": "1",
-      "use_always": "0",
-      "custom_price": "-1.00"
+    "#10167623-#404": {
+      "checked": true
+    },
+    "#10167623-#404-3431": {
+      "checked": true
+    },
+    "#10167623-#456": {
+      "checked": true
+    },
+    "#10167623-#456-2379": {
+      "checked": true
+    },
+    "#10167623-#456-3644": {
+      "checked": true
     }
   };
 

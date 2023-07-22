@@ -26,7 +26,6 @@
 
 
         </Tree>
-        {{currentSelectedKeys}}
     </div>
 </template>
 
@@ -52,19 +51,30 @@
     }
 
 
+
     const priceDefault = (nodeData) => {
         return (nodeData.data.price) ??  '';
     }
+    onMounted(async () => {
+        console.log('onMounted')
+    });
 
 
 
     const treeNodes = ref(DoctorsIservicesBindsService.getIservicesTree());
     const selectedKeys = computed( {
         get: () => {
-            const selectedItems = (currentSelectedKeys.value) ? currentSelectedKeys.value : window.treeBinds.selectedItems;
+            return (currentSelectedKeys.value) ??  window.treeBinds.selectedItems;
+           // const selectedItems = (currentSelectedKeys.value) ? currentSelectedKeys.value : window.treeBinds.selectedItems;
+            currentSelectedKeys.value = Object.assign(currentSelectedKeys.value, window.treeBinds.selectedItems)
+            return  window.treeBinds.selectedItems;
         return DoctorsIservicesBindsService.mergeBindsData(treeNodes.value, selectedItems, 'iservice')
         },
-        set :(e) =>{currentSelectedKeys.value  = e;}
+        set :(e) =>{
+
+            currentSelectedKeys.value  = e;
+            console.log(e)
+        }
     });
 
 
