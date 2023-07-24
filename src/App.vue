@@ -11,9 +11,10 @@
   import {DoctorsIservicesBindsService} from "./services/DoctorsIservicesBindsService";
 
   let  mockNodes = ref({});
+  let  mockCustomData = ref({});
  const  mockSelectedItems = ref({});
 
-  window.treeBinds = (window.treeBinds) ? reactive(window.treeBinds) : reactive({tree:mockNodes, selectedItems:mockSelectedItems, changedData:{}, showDialog:false});
+  window.treeBinds = (window.treeBinds) ? reactive(window.treeBinds) : reactive({tree:mockNodes, selectedItems:mockSelectedItems, customData:mockCustomData, showDialog:false});
   const showDialog = computed({
     get(){ return  window.treeBinds.showDialog},
     set(s){ window.treeBinds.showDialog = s;}
@@ -101,6 +102,28 @@ const onSave = (e) =>{
       }
     }
   ];
+  mockCustomData.value ={
+    "36": {
+      "active": "1",
+      "use_always": "0",
+      "custom_price": "3500.00"
+    },
+    "270": {
+      "active": "1",
+      "use_always": "0",
+      "custom_price": "2990.00"
+    },
+    "2286": {
+      "active": "1",
+      "use_always": "1",
+      "custom_price": "-1.00"
+    },
+    "2289": {
+      "active": "1",
+      "use_always": "1",
+      "custom_price": "-1.00"
+    }
+  };
 
 </script>
 

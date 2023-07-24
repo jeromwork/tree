@@ -35,17 +35,20 @@ export const DoctorsIservicesBindsService = {
         if( !condition ) return this.state.getItems();
     },
 
-    async saveBinds(oldCheckedItems, newCheckedItems){
-        const requestData = {
-            action:'saveBindsDoctorsIservices',
-            component:'health',
-            oldBinds:oldCheckedItems,
-            newBinds:newCheckedItems,
-        }
+    async saveBinds( requestData ){
+        return  await treeApi.saveBinds( requestData );
+    },
 
-        const res = await treeApi.saveBinds(requestData);
-        console.log(res)
-    }
+    // getCheckNode(node){
+    //     let  checkedNodes = {}
+    //     checkedNodes[node.key] = {checked:true};
+    //
+    //     if(node.children){
+    //
+    //         node.children.forEach( child => checkedNodes = {...checkedNodes, ...this.getCheckNode(child)})
+    //     }
+    //     return checkedNodes;
+    // }
 
 
 };

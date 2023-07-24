@@ -16,11 +16,15 @@ export default (() => ({
         if(!data || !data.items) return {};
         return data;
     },
-    async saveBinds( saveData ){
-        if(!saveData || Object.keys(saveData).length === 0) return {}
+    async saveBinds( requestData ){
 
         let request = {
-            body: JSON.stringify(saveData),
+
+            body: JSON.stringify({
+                ...requestData,
+                action:'bindsDoctorsIservices/save',
+                component:'health'
+            }),
             headers: {
                 'Content-Type': 'application/json'
             },
@@ -30,7 +34,6 @@ export default (() => ({
 
         try {
             const res = await fetch(baseUrl, request);
-            console.log(res)
             //todo handle server error (500, 502 ...)
             if(!res) return {};
             return await res.json()
