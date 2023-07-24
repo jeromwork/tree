@@ -1,9 +1,10 @@
 <template>
     <Dialog :visible="props.visible"
             @update:visible="emit('update:visible', $event)"
+
             maximizable modal header="Header" :style="{ width: '50vw' }"
     >
-        <tree  v-bind="$attrs"/>
+        <tree ref="treeComponent"  v-bind="$attrs"/>
 
 
         <template #footer>
@@ -14,7 +15,7 @@
 </template>
 
 <script setup>
-    import {defineProps, defineEmits  } from 'vue';
+    import {defineProps, defineEmits, ref } from 'vue';
     import tree from '@/components/tree'
 
     const props = defineProps({
@@ -27,11 +28,12 @@
     const emit = defineEmits(['update:visible', 'save', 'cancel'])
 
 
-    const onCancel = () => {emit('cancel', true)}
-    const onSave = () => {emit('save', true)}
+    const treeComponent = ref(null);
+    const onCancel = () => {emit('update:visible', false)}
+    const onSave = () => {
+        treeComponent.value.saveData();
+        emit('update:visible', false)
+    }
+
 
 </script>
-
-<style scoped>
-
-</style>

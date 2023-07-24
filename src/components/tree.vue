@@ -31,7 +31,7 @@
 
 <script setup>
 
-    import {ref, onMounted, reactive, computed,  defineProps} from 'vue';
+    import {ref, onMounted, reactive, computed,  defineProps, watch} from 'vue';
     import {DoctorsIservicesBindsService} from "../services/DoctorsIservicesBindsService";
 
     const nodes = ref(null);
@@ -55,19 +55,15 @@
     const priceDefault = (nodeData) => {
         return (nodeData.data.price) ??  '';
     }
-    onMounted(async () => {
-        console.log('onMounted')
-    });
+
 
 
 
     const treeNodes = ref(DoctorsIservicesBindsService.getIservicesTree());
+
     const selectedKeys = computed( {
         get: () => {
-            return (currentSelectedKeys.value) ??  window.treeBinds.selectedItems;
-           // const selectedItems = (currentSelectedKeys.value) ? currentSelectedKeys.value : window.treeBinds.selectedItems;
-            currentSelectedKeys.value = Object.assign(currentSelectedKeys.value, window.treeBinds.selectedItems)
-            return  window.treeBinds.selectedItems;
+            return (currentSelectedKeys.value) ? currentSelectedKeys.value : window.treeBinds.selectedItems;
         return DoctorsIservicesBindsService.mergeBindsData(treeNodes.value, selectedItems, 'iservice')
         },
         set :(e) =>{
@@ -77,5 +73,26 @@
         }
     });
 
+    const saveData = () => {
+
+        const oldCheckedItems = {...window.treeBinds.selectedItems};
+        const newCheckedItems = {...currentSelectedKeys.value};
+        //if not change - return
+
+        if(Object.keys(newCheckedItems).length === 0 ||
+            JSON.stringify(oldCheckedItems) === JSON.stringify(newCheckedItems)
+        )   {
+            return;
+        }
+        console.log('save!!!')
+        DoctorsIservicesBindsService.saveBinds(oldCheckedItems, newCheckedItems)
+
+
+    };
+
+    defineExpose({
+        saveData
+
+    });
 
 </script>

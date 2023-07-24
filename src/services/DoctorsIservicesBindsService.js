@@ -35,5 +35,17 @@ export const DoctorsIservicesBindsService = {
         if( !condition ) return this.state.getItems();
     },
 
+    async saveBinds(oldCheckedItems, newCheckedItems){
+        const requestData = {
+            action:'saveBindsDoctorsIservices',
+            component:'health',
+            oldBinds:oldCheckedItems,
+            newBinds:newCheckedItems,
+        }
+
+        const res = await treeApi.saveBinds(requestData);
+        console.log(res)
+    }
+
 
 };
