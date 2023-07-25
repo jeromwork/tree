@@ -2,7 +2,7 @@
 <template>
     <div class="card flex justify-content-center" @click="c">
 <!--        <Tree v-model:selectionKeys="selectedKey" :value="treeBinds.tree" selectionMode="checkbox" class="w-full"-->
-        <Toast />
+
         <Tree
               v-model:selectionKeys="selectedKeys"
               :value="treeNodes" selectionMode="checkbox" class="w-full"
@@ -14,7 +14,15 @@
                 <div class="flex align-items-center">
                     {{ slotProps.node.id }}{{ slotProps.node.label }}
                     <span v-if="priceDefault(slotProps.node)" @click.stop="">
-                        <CustomPrice :priceDefault="slotProps.node.data.price" />
+                            <InputText v-if="slotProps.node.data.price"
+                                       type="number"
+                                       min="1"
+                                       size="small"
+                                       :value="getCustomData(slotProps.node, 'custom_price')"
+                                       @change="setCustomPrice(slotProps.node, $event.target.value)"
+                                       :placeholder="slotProps.node.data.price"
+
+                            />
                     </span>
                 </div>
 
@@ -22,7 +30,7 @@
 
 
         </Tree>
-        {{selectedKeys}}
+        {{currentCustomData}}
     </div>
 </template>
 
@@ -30,7 +38,10 @@
 
     import {ref, onMounted, reactive, computed,  defineProps, watch} from 'vue';
     import {DoctorsIservicesBindsService} from "../services/DoctorsIservicesBindsService";
+    import Toast from '../services/Toast'
+
     import { useToast } from "primevue/usetoast";
+
     const toast = useToast();
 
     const nodes = ref(null);
@@ -44,21 +55,22 @@
     });
 
     let  currentSelectedKeys = ref(null);
-    let  currentCustomData = ref(null);
+    let  currentCustomData = ref({});
 
-    const setCustomPrice =( node, e )=>{
-        // console.log(DoctorsIservicesBindsService.getCheckNode(node))
-        // if(node.children){
-        //
-        // }
+    const setCustomPrice =( node, newPrice )=>{
+
         const currentSelectedKeys = {...selectedKeys.value}
+
         if(!currentSelectedKeys || !currentSelectedKeys[node.key]){
+
             toast.add({ severity: 'warn', summary: 'Ошибка назначения цены', detail: 'Прежде чем назначить спец цену доктору, выберите эту услугу', life: 3000 });
 
         }
 
-        if(selectedKeys[node.key]){
-            currentCustomData[id] = (currentCustomData) ? { ...treeBinds.changedData[id], customPrice : e.target.value*1} : {customPrice : e.target.value*1};
+        if(selectedKeys.value[node.key]){
+            currentCustomData.value[node.id] = (currentCustomData.value[node.id])
+                    ?{ ...currentCustomData.value[node.id], custom_price : newPrice*1}
+                    :{custom_price : newPrice*1};
         }
 
         }
@@ -99,22 +111,26 @@
         const newCheckedItems = {...currentSelectedKeys.value};
         const changedData = currentCustomData.value;
         //if not change - return
-        console.log(changedData)
 
         if( JSON.stringify(oldCheckedItems) === JSON.stringify(newCheckedItems))  return; //<<<<<<<<<<<<<<<<
 
         const requestData = {
             newBinds:newCheckedItems,
             oldBinds:oldCheckedItems,
-            changedData:treeBinds.changedData,
             id:8
         };
-        if(Object.keys(changedData).length > 0){
+        if(changedData && Object.keys(changedData).length > 0){
             requestData['changedData'] = changedData;
         }
-
         const res = await DoctorsIservicesBindsService.saveBinds( requestData )
-        console.log(res)
+
+        if(res && res.ok && res.message){
+
+            Toast.success( 'Данные сохранены', res.message )
+            console.log(res)
+
+        }
+
 
     };
 

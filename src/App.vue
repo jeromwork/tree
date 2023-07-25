@@ -1,4 +1,4 @@
-<template>
+<template>        <Toast />
   <div ref="treeDialogComponent" id="treeDialogComponent">
     <Button v-if="showTestDialogButton" label="Show" icon="pi pi-external-link" @click="showDialog = true" />
     <TreeDialog id="tree" v-model:visible="showDialog" @save="onSave"/>

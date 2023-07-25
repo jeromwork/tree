@@ -14,7 +14,7 @@ import "primevue/resources/themes/lara-light-blue/theme.css";
 import "primevue/resources/primevue.min.css"; /* Deprecated */
 import "primeicons/primeicons.css";
 
-const app = createApp(App);
+export  const app = createApp(App);
 app.component('Tree', Tree);
 app.component('InputText', InputText);
 app.component('Button', Button);

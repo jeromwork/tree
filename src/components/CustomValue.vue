@@ -14,7 +14,7 @@
 import {ref, defineProps} from 'vue'
 
 const props = defineProps([
-    priceDefault,
+    value,
 ]);
 
 </script>
