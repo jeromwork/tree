@@ -18,11 +18,16 @@
                                        type="number"
                                        min="1"
                                        size="small"
-                                       :value="getCustomData(slotProps.node, 'custom_price')"
-                                       @change="setCustomPrice(slotProps.node, $event.target.value)"
+                                       :modelValue="getCustomData(slotProps.node, 'custom_price')"
+                                       @change="setCustomData(slotProps.node, $event.target.value, 'custom_price' )"
                                        :placeholder="slotProps.node.data.price"
 
                             />
+                        <InputSwitch :modelValue="getCustomData(slotProps.node, 'use_always')*1"
+                                     @update:modelValue="setCustomData(slotProps.node, $event, 'use_always')"
+                                     :trueValue = "1"
+                                     :falseValue = "0"
+                        />
                     </span>
                 </div>
 
@@ -30,13 +35,12 @@
 
 
         </Tree>
-        {{currentCustomData}}
     </div>
 </template>
 
 <script setup>
 
-    import {ref, onMounted, reactive, computed,  defineProps, watch} from 'vue';
+    import {ref, onMounted, reactive, onBeforeUnmount, computed,  defineProps, watch} from 'vue';
     import {DoctorsIservicesBindsService} from "../services/DoctorsIservicesBindsService";
     import Toast from '../services/Toast'
 
@@ -45,6 +49,8 @@
     const toast = useToast();
 
     const nodes = ref(null);
+
+
     // const selectedKey = ref({'0-0' : {checked:'checked'}});
     const treeBinds = window.treeBinds;
 
@@ -54,39 +60,25 @@
         },
     });
 
-    let  currentSelectedKeys = ref(null);
-    let  currentCustomData = ref({});
+    let  currentSelectedKeys = ref([]);
 
-    const setCustomPrice =( node, newPrice )=>{
+    onMounted(() => {
+        document.addEventListener('keyup', ctrlZHandler)
+    })
+    onBeforeUnmount(() => {
+        document.removeEventListener('keyup', ctrlZHandler);
+    });
 
-        const currentSelectedKeys = {...selectedKeys.value}
-
-        if(!currentSelectedKeys || !currentSelectedKeys[node.key]){
-
-            toast.add({ severity: 'warn', summary: 'Ошибка назначения цены', detail: 'Прежде чем назначить спец цену доктору, выберите эту услугу', life: 3000 });
-
+    function ctrlZHandler(event) {
+        if (event.ctrlKey && event.key === 'z') {
+            const lengthSelectedKeys = currentSelectedKeys.value.length;
+            if(lengthSelectedKeys > 0){
+                currentSelectedKeys.value.splice(-1, 1)
+            }
         }
-
-        if(selectedKeys.value[node.key]){
-            currentCustomData.value[node.id] = (currentCustomData.value[node.id])
-                    ?{ ...currentCustomData.value[node.id], custom_price : newPrice*1}
-                    :{custom_price : newPrice*1};
-        }
-
-        }
-
-
-
-
-    const priceDefault = (nodeData) => {
-        return (nodeData.data.price) ??  '';
     }
 
-
-    const treeNodes = ref(DoctorsIservicesBindsService.getIservicesTree());
-
-
-
+//===================================customData===========================
     const getCustomData = (node, field) => {
         return (customData.value &&  customData.value[node.id] && customData.value[node.id][field]) ? customData.value[node.id][field] : null;
     }
@@ -95,20 +87,51 @@
         return (currentCustomData.value) ? currentCustomData.value : window.treeBinds.customData;
     });
 
+    const priceDefault = (nodeData) => {
+        return (nodeData.data.price) ??  '';
+    }
+
+    let  currentCustomData = ref({});
+
+    const setCustomData =( node, newValue, field )=>{
+        console.log(node, newValue, field)
+
+        const currentSelectedKeys = {...selectedKeys.value}
+
+        if(!currentSelectedKeys || !currentSelectedKeys[node.key]){
+            Toast.duration(5000).warning( '', 'Не забудьте отметить услугу '+node.label )
+        }
+
+        if(selectedKeys.value[node.key]){
+            const newDataObj = {}
+            newDataObj[field] = newValue*1;
+            currentCustomData.value[node.id] = (currentCustomData.value[node.id])
+                ?{ ...currentCustomData.value[node.id], ...newDataObj}
+                :newDataObj;
+        }
+    }
+
+
+//=============================tree nodes====================
+    const treeNodes = ref(DoctorsIservicesBindsService.getIservicesTree());
+
     const selectedKeys = computed( {
         get: () => {
-            return (currentSelectedKeys.value) ? currentSelectedKeys.value : window.treeBinds.selectedItems;
-        // return DoctorsIservicesBindsService.mergeBindsData(treeNodes.value, selectedItems, 'iservice')
+            const lengthSelectedKeys = currentSelectedKeys.value.length;
+            return (lengthSelectedKeys > 0) ? currentSelectedKeys.value[lengthSelectedKeys - 1] : window.treeBinds.selectedItems;
         },
-        set :(e) =>{
-            currentSelectedKeys.value  = e;
+        set :(keys) =>{
+            const lengthSelectedKeys = currentSelectedKeys.value.length;
+            currentSelectedKeys.value.push(keys);
+            if(lengthSelectedKeys > 10){
+                currentSelectedKeys.value.splice(0, 1)
+            }
         }
     });
 
     const saveData = async () => {
-
         const oldCheckedItems = {...window.treeBinds.selectedItems};
-        const newCheckedItems = {...currentSelectedKeys.value};
+        const newCheckedItems = {...currentSelectedKeys.value[currentSelectedKeys.value.length - 1]};
         const changedData = currentCustomData.value;
         //if not change - return
 
@@ -117,7 +140,7 @@
         const requestData = {
             newBinds:newCheckedItems,
             oldBinds:oldCheckedItems,
-            id:8
+            id:455
         };
         if(changedData && Object.keys(changedData).length > 0){
             requestData['changedData'] = changedData;
