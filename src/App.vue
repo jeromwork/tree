@@ -1,7 +1,7 @@
 <template>        <Toast />
   <div ref="treeDialogComponent" id="treeDialogComponent">
     <Button v-if="showTestDialogButton" label="Show" icon="pi pi-external-link" @click="showDialog = true" />
-    <TreeDialog id="tree" v-model:visible="showDialog" @save="onSave"/>
+    <TreeDialog id="tree" v-model:visible="showDialog"/>
   </div>
 </template>
 
@@ -14,26 +14,21 @@
   let  mockCustomData = ref({});
  const  mockSelectedItems = ref({});
 
-  window.treeBinds = (window.treeBinds) ? reactive(window.treeBinds) : reactive({tree:mockNodes, selectedItems:mockSelectedItems, customData:mockCustomData, showDialog:false});
+  window.treeBinds = (window.treeBinds) ? reactive(window.treeBinds) : reactive({tree:{}, selectedItems:mockSelectedItems, customData:mockCustomData, showDialog:false, doctor:{id:8}});
   const showDialog = computed({
     get(){ return  window.treeBinds.showDialog},
     set(s){ window.treeBinds.showDialog = s;}
   });
   const treeDialogComponent = ref(null);
   const showTestDialogButton = computed(()=>!window.$);
-const onSave = (e) =>{
-  console.log()
-// Dispatch/Trigger/Fire the event
-  treeDialogComponent.value.dispatchEvent(new CustomEvent("save", {detail: window.treeBinds}));
 
-  showDialog.value = false;
 
-}
 
 
 
   onMounted(async () => {
      await DoctorsIservicesBindsService.fetchIservicesTreeFromServer();
+
   });
 
   mockSelectedItems.value = {

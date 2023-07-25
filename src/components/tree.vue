@@ -12,7 +12,7 @@
 
             <template #default="slotProps">
                 <div class="flex align-items-center">
-                    {{ slotProps.node.id }}{{ slotProps.node.label }}
+                    {{ slotProps.node.id }} {{ slotProps.node.label }}
                     <span v-if="priceDefault(slotProps.node)" @click.stop="">
                             <InputText v-if="slotProps.node.data.price"
                                        type="number"
@@ -60,7 +60,7 @@
         },
     });
 
-    let  currentSelectedKeys = ref([]);
+    let  currentSelectedKeys = ref([window.treeBinds.selectedItems]);
 
     onMounted(() => {
         document.addEventListener('keyup', ctrlZHandler)
@@ -70,13 +70,16 @@
     });
 
     function ctrlZHandler(event) {
-        if (event.ctrlKey && event.key === 'z') {
+        if (event.ctrlKey && event.code === 'KeyZ') {
+
             const lengthSelectedKeys = currentSelectedKeys.value.length;
-            if(lengthSelectedKeys > 0){
+            if(lengthSelectedKeys > 1){
                 currentSelectedKeys.value.splice(-1, 1)
             }
         }
     }
+
+    const doctorId = computed(()=> window.treeBinds.doctor.id)
 
 //===================================customData===========================
     const getCustomData = (node, field) => {
@@ -84,18 +87,16 @@
     }
 
     const customData = computed(() =>{
-        return (currentCustomData.value) ? currentCustomData.value : window.treeBinds.customData;
+        return (currentCustomData.value && Object.keys( currentCustomData.value).length > 0) ? currentCustomData.value : window.treeBinds.customData;
     });
 
     const priceDefault = (nodeData) => {
         return (nodeData.data.price) ??  '';
     }
 
-    let  currentCustomData = ref({});
+    let  currentCustomData = ref(window.treeBinds.customData);
 
     const setCustomData =( node, newValue, field )=>{
-        console.log(node, newValue, field)
-
         const currentSelectedKeys = {...selectedKeys.value}
 
         if(!currentSelectedKeys || !currentSelectedKeys[node.key]){
@@ -132,23 +133,33 @@
     const saveData = async () => {
         const oldCheckedItems = {...window.treeBinds.selectedItems};
         const newCheckedItems = {...currentSelectedKeys.value[currentSelectedKeys.value.length - 1]};
+
+        const jsonOldCheckedItems = JSON.stringify(oldCheckedItems);
+        const jsonNewCheckedItems = JSON.stringify(newCheckedItems);
+
         const changedData = currentCustomData.value;
         //if not change - return
 
-        if( JSON.stringify(oldCheckedItems) === JSON.stringify(newCheckedItems))  return; //<<<<<<<<<<<<<<<<
+        if( jsonOldCheckedItems === jsonNewCheckedItems && ( !changedData || Object.keys(changedData).length === 0) )  return; //<<<<<<<<<<<<<<<<
 
         const requestData = {
-            newBinds:newCheckedItems,
-            oldBinds:oldCheckedItems,
-            id:455
+            id:doctorId.value
         };
+
+        if(jsonOldCheckedItems !== jsonNewCheckedItems){
+            requestData['newBinds'] = newCheckedItems
+            requestData['oldBinds'] = oldCheckedItems
+        }
+
         if(changedData && Object.keys(changedData).length > 0){
             requestData['changedData'] = changedData;
         }
         const res = await DoctorsIservicesBindsService.saveBinds( requestData )
 
-        if(res && res.ok && res.message){
 
+        if(res && res.ok && res.message){
+            //const saveBinds = (new CustomEvent("saveBinds", { detail: { doctorId: doctorId, }, }));
+            document.dispatchEvent((new CustomEvent("saveBindsForDoctor", { detail: { doctorId: doctorId.value, }, })));
             Toast.success( 'Данные сохранены', res.message )
             console.log(res)
 

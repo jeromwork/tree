@@ -2,7 +2,7 @@
     <Dialog :visible="props.visible"
             @update:visible="emit('update:visible', $event)"
 
-            maximizable modal header="Header" :style="{ width: '50vw' }"
+            maximizable modal :header="doctor.fullname" :style="{ width: '50vw' }"
     >
         <tree ref="treeComponent"  v-bind="$attrs"/>
 
@@ -12,10 +12,11 @@
             <Button label="cancel" @click="onCancel"/>
         </template>
     </Dialog>
+
 </template>
 
 <script setup>
-    import {defineProps, defineEmits, ref } from 'vue';
+    import {defineProps, defineEmits, ref, computed } from 'vue';
     import tree from '@/components/tree'
 
     const props = defineProps({
@@ -29,6 +30,8 @@
 
 
     const treeComponent = ref(null);
+    const doctor = computed(() => window.treeBinds.doctor);
+
     const onCancel = () => {emit('update:visible', false)}
     const onSave = () => {
         treeComponent.value.saveData();
