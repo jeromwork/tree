@@ -3,7 +3,7 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import Tree from 'primevue/tree';
-import InputText from 'primevue/inputtext';
+import InputNumber  from 'primevue/inputnumber';
 import InputSwitch from 'primevue/inputswitch';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
@@ -17,7 +17,7 @@ import "primeicons/primeicons.css";
 
 export  const app = createApp(App);
 app.component('Tree', Tree);
-app.component('InputText', InputText);
+app.component('InputNumber', InputNumber);
 app.component('InputSwitch', InputSwitch);
 app.component('Button', Button);
 app.component('Dialog', Dialog);

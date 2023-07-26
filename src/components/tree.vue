@@ -12,17 +12,30 @@
 
             <template #default="slotProps">
                 <div class="flex align-items-center">
-                    {{ slotProps.node.id }} {{ slotProps.node.label }}
+                    {{ slotProps.node.label }}<span v-if="slotProps.node.data.price">({{slotProps.node.data.price}} руб.)</span>
                     <span v-if="priceDefault(slotProps.node)" @click.stop="">
-                            <InputText v-if="slotProps.node.data.price"
-                                       type="number"
-                                       min="1"
-                                       size="small"
-                                       :modelValue="getCustomData(slotProps.node, 'custom_price')"
-                                       @change="setCustomData(slotProps.node, $event.target.value, 'custom_price' )"
-                                       :placeholder="slotProps.node.data.price"
 
-                            />
+
+                        <div class="p-inputgroup flex-1">
+                        <InputNumber v-if="slotProps.node.data.price"
+                                     :inputStyle = "(getPriceDiscount(slotProps.node)) ? { color: '#51d323', 'font-weight': 'bold'} : {}"
+                                     :min="1"
+                                     :placeholder="getPrice(slotProps.node)+''"
+                                     :modelValue="getPrice(slotProps.node)"
+                                     @update:modelValue="setCustomData(slotProps.node, $event, 'custom_price' )"
+                        />
+                        <span class="p-inputgroup-addon">руб</span>
+                    </div>
+
+                    <div class="p-inputgroup flex-1">
+                        <InputNumber v-if="slotProps.node.data.price"
+                                     :min="1"
+                                     placeholder="Скидка"
+                                     :modelValue="getPriceDiscount(slotProps.node)"
+                                     @input="setPriceDiscount(slotProps.node, $event.value )"
+                        />
+                    <span class="p-inputgroup-addon">%</span>
+                    </div>
                         <InputSwitch :modelValue="getCustomData(slotProps.node, 'use_always')*1"
                                      @update:modelValue="setCustomData(slotProps.node, $event, 'use_always')"
                                      :trueValue = "1"
@@ -53,6 +66,7 @@
 
     // const selectedKey = ref({'0-0' : {checked:'checked'}});
     const treeBinds = window.treeBinds;
+
 
     const props = defineProps({
         selectedKeys:{
@@ -86,6 +100,16 @@
         return (customData.value &&  customData.value[node.id] && customData.value[node.id][field]) ? customData.value[node.id][field] : null;
     }
 
+    const getPrice = (node) => {
+        const customPrice = getCustomData(node, 'custom_price')*1;
+        return ( customPrice && customPrice > 0 ) ? customPrice : node.data.price;
+    }
+    const getPriceDiscount = (node) => {
+        const price = getPrice(node);
+        return ( node.data.price && node.data.price > 0 && price > 0 && node.data.price > price ) ? 100 - Math.floor((price/node.data.price) * 100) : 0
+    }
+
+
     const customData = computed(() =>{
         return (currentCustomData.value && Object.keys( currentCustomData.value).length > 0) ? currentCustomData.value : window.treeBinds.customData;
     });
@@ -96,22 +120,29 @@
 
     let  currentCustomData = ref(window.treeBinds.customData);
 
+
+    const setPriceDiscount = (node, value)=>{
+        if(value === getPriceDiscount(node)) return;
+        const priceByDiscount = node.data.price - Math.floor(node.data.price  * (value / 100))
+        setCustomData(node, priceByDiscount, 'custom_price')
+    }
+
     const setCustomData =( node, newValue, field )=>{
         const currentSelectedKeys = {...selectedKeys.value}
-
         if(!currentSelectedKeys || !currentSelectedKeys[node.key]){
             Toast.duration(5000).warning( '', 'Не забудьте отметить услугу '+node.label )
         }
 
+        const newDataObj = {}
+        newDataObj[field] = newValue*1;
+        currentCustomData.value[node.id] = (currentCustomData.value[node.id])
+            ?{ ...currentCustomData.value[node.id], ...newDataObj}
+            :newDataObj;
+
         if(selectedKeys.value[node.key]){
-            const newDataObj = {}
-            newDataObj[field] = newValue*1;
-            currentCustomData.value[node.id] = (currentCustomData.value[node.id])
-                ?{ ...currentCustomData.value[node.id], ...newDataObj}
-                :newDataObj;
+
         }
     }
-
 
 //=============================tree nodes====================
     const treeNodes = ref(DoctorsIservicesBindsService.getIservicesTree());
@@ -174,3 +205,11 @@
     });
 
 </script>
+
+
+<style scoped>
+    .discount{
+        color: #51d323;
+        font-weight: bold
+    }
+</style>
