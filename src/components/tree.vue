@@ -12,17 +12,19 @@
 
             <template #default="slotProps">
                 <div class="flex align-items-center">
-                    {{ slotProps.node.id }} {{ slotProps.node.label }}
+                    {{ slotProps.node.label }}<span v-if="slotProps.node.data.price">({{slotProps.node.data.price}} руб.)</span>
                     <span v-if="priceDefault(slotProps.node)" @click.stop="">
-                            <InputText v-if="slotProps.node.data.price"
-                                       type="number"
-                                       min="1"
-                                       size="small"
-                                       :modelValue="getCustomData(slotProps.node, 'custom_price')"
+                        <span class="p-float-label">
+                            <InputNumber v-if="slotProps.node.data.price"
+                                         :style="{ color: '#51d323'}"
+                                       :min="1"
+                                        :inputId = "'price_'+slotProps.node.key"
+                                       :modelValue="getPrice(slotProps.node)"
                                        @change="setCustomData(slotProps.node, $event.target.value, 'custom_price' )"
-                                       :placeholder="slotProps.node.data.price"
-
                             />
+                            <label :for="'price_'+slotProps.node.key">Стоимость</label>
+                            </span>
+                        {{getPrice(slotProps.node)}}
                         <InputSwitch :modelValue="getCustomData(slotProps.node, 'use_always')*1"
                                      @update:modelValue="setCustomData(slotProps.node, $event, 'use_always')"
                                      :trueValue = "1"
@@ -53,6 +55,8 @@
 
     // const selectedKey = ref({'0-0' : {checked:'checked'}});
     const treeBinds = window.treeBinds;
+
+    const priceDiscount = (price, customPrice) => (customPrice && customPrice > 0 && price > customPrice)
 
     const props = defineProps({
         selectedKeys:{
@@ -86,6 +90,11 @@
         return (customData.value &&  customData.value[node.id] && customData.value[node.id][field]) ? customData.value[node.id][field] : null;
     }
 
+    const getPrice = (node) => {
+        const customPrice = getCustomData(node, 'custom_price');
+        return ( customPrice && customPrice * 1 > 0 ) ? customPrice : node.price;
+    }
+
     const customData = computed(() =>{
         return (currentCustomData.value && Object.keys( currentCustomData.value).length > 0) ? currentCustomData.value : window.treeBinds.customData;
     });
@@ -111,7 +120,6 @@
                 :newDataObj;
         }
     }
-
 
 //=============================tree nodes====================
     const treeNodes = ref(DoctorsIservicesBindsService.getIservicesTree());
