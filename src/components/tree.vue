@@ -16,7 +16,7 @@
                     <span v-if="priceDefault(slotProps.node)" @click.stop="">
                         <span class="p-float-label">
                             <InputNumber v-if="slotProps.node.data.price"
-                                         :style="{ color: '#51d323'}"
+                                         :inputStyle = "(isDiscountPrice(slotProps.node)) ? { color: '#51d323', 'font-weight': 'bold'} : {}"
                                        :min="1"
                                         :inputId = "'price_'+slotProps.node.key"
                                        :modelValue="getPrice(slotProps.node)"
@@ -24,7 +24,6 @@
                             />
                             <label :for="'price_'+slotProps.node.key">Стоимость</label>
                             </span>
-                        {{getPrice(slotProps.node)}}
                         <InputSwitch :modelValue="getCustomData(slotProps.node, 'use_always')*1"
                                      @update:modelValue="setCustomData(slotProps.node, $event, 'use_always')"
                                      :trueValue = "1"
@@ -56,7 +55,10 @@
     // const selectedKey = ref({'0-0' : {checked:'checked'}});
     const treeBinds = window.treeBinds;
 
-    const priceDiscount = (price, customPrice) => (customPrice && customPrice > 0 && price > customPrice)
+    const isDiscountPrice = (node) => {
+        const price = getPrice(node);
+        return ( node.data.price && price > 0 && node.data.price > price )
+    }
 
     const props = defineProps({
         selectedKeys:{
@@ -91,8 +93,8 @@
     }
 
     const getPrice = (node) => {
-        const customPrice = getCustomData(node, 'custom_price');
-        return ( customPrice && customPrice * 1 > 0 ) ? customPrice : node.price;
+        const customPrice = getCustomData(node, 'custom_price')*1;
+        return ( customPrice && customPrice > 0 ) ? customPrice : node.data.price;
     }
 
     const customData = computed(() =>{
@@ -182,3 +184,11 @@
     });
 
 </script>
+
+
+<style scoped>
+    .discount{
+        color: #51d323;
+        font-weight: bold
+    }
+</style>
