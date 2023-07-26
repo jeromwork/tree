@@ -18,9 +18,10 @@
                             <InputNumber v-if="slotProps.node.data.price"
                                          :inputStyle = "(isDiscountPrice(slotProps.node)) ? { color: '#51d323', 'font-weight': 'bold'} : {}"
                                        :min="1"
+                                         :placeholder="getPrice(slotProps.node)+''"
                                         :inputId = "'price_'+slotProps.node.key"
                                        :modelValue="getPrice(slotProps.node)"
-                                       @change="setCustomData(slotProps.node, $event.target.value, 'custom_price' )"
+                                       @update:modelValue="setCustomData(slotProps.node, $event, 'custom_price' )"
                             />
                             <label :for="'price_'+slotProps.node.key">Стоимость</label>
                             </span>
@@ -109,7 +110,6 @@
 
     const setCustomData =( node, newValue, field )=>{
         const currentSelectedKeys = {...selectedKeys.value}
-
         if(!currentSelectedKeys || !currentSelectedKeys[node.key]){
             Toast.duration(5000).warning( '', 'Не забудьте отметить услугу '+node.label )
         }
