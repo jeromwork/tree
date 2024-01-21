@@ -22,7 +22,7 @@ export default (() => ({
 
             body: JSON.stringify({
                 ...requestData,
-                action:'bindsDoctorsIservices/save',
+                action:'SaveBindDoctorVariation',
                 component:'health'
             }),
             headers: {
