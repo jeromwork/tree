@@ -36,6 +36,16 @@
                         />
                     <span class="p-inputgroup-addon">%</span>
                     </div>
+
+                    <div class="p-inputgroup flex-1">
+                        <InputNumber v-if="slotProps.node.data.price"
+                                     :min="1"
+                                     placeholder="Онлайн"
+                                     :modelValue="getPriceOnline(slotProps.node)"
+                                     @update:modelValue="setCustomData(slotProps.node, $event, 'price_online' )"
+                        />
+                    <span class="p-inputgroup-addon">руб</span>
+                    </div>
                         <InputSwitch :modelValue="getCustomData(slotProps.node, 'use_always')*1"
                                      @update:modelValue="setCustomData(slotProps.node, $event, 'use_always')"
                                      :trueValue = "1"
@@ -107,6 +117,10 @@
     const getPriceDiscount = (node) => {
         const price = getPrice(node);
         return ( node.data.price && node.data.price > 0 && price > 0 && node.data.price > price ) ? 100 - Math.floor((price/node.data.price) * 100) : 0
+    }
+
+    const getPriceOnline = (node) => {
+        return getCustomData(node, 'price_online');
     }
 
 
